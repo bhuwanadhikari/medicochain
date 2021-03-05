@@ -1,0 +1,86 @@
+version: '2'
+
+networks:
+  test:
+
+services:
+
+  ca_manufacturer:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-manufacturer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=7054
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/manufacturer:/etc/hyperledger/fabric-ca-server
+    container_name: ca_manufacturer
+    networks:
+      - test
+
+  ca_distributor:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-distributor
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=8054
+    ports:
+      - "8054:8054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/distributor:/etc/hyperledger/fabric-ca-server
+    container_name: ca_distributor
+    networks:
+      - test
+
+  ca_wholesaler:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-wholesaler
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=6054
+    ports:
+      - "6054:6054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/wholesaler:/etc/hyperledger/fabric-ca-server
+    container_name: ca_wholesaler
+    networks:
+      - test
+
+  ca_retailer:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-retailer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=5054
+    ports:
+      - "5054:5054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/retailer:/etc/hyperledger/fabric-ca-server
+    container_name: ca_retailer
+    networks:
+      - test
+
+  ca_orderer:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-orderer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=9054
+    ports:
+      - "9054:9054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+    container_name: ca_orderer
+    networks:
+      - test

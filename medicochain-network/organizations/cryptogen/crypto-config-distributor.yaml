@@ -1,0 +1,10 @@
+PeerOrgs:
+  - Name: Distributor
+    Domain: distributor.medicochain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+    Users:
+      Count: 1

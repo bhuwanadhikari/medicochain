@@ -1,0 +1,188 @@
+
+version: '2'
+
+volumes:
+  orderer.medicochain.com:
+  peer0.manufacturer.medicochain.com:
+  peer0.distributor.medicochain.com:
+  peer0.wholesaler.medicochain.com:
+  peer0.retailer.medicochain.com:
+
+networks:
+  test:
+
+services:
+
+  orderer.medicochain.com:
+    container_name: orderer.medicochain.com
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
+      - ORDERER_KAFKA_VERBOSE=true
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+        - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+        - ../organizations/ordererOrganizations/medicochain.com/orderers/orderer.medicochain.com/msp:/var/hyperledger/orderer/msp
+        - ../organizations/ordererOrganizations/medicochain.com/orderers/orderer.medicochain.com/tls/:/var/hyperledger/orderer/tls
+        - orderer.medicochain.com:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+    networks:
+      - test
+
+  peer0.manufacturer.medicochain.com:
+    container_name: peer0.manufacturer.medicochain.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.manufacturer.medicochain.com
+      - CORE_PEER_ADDRESS=peer0.manufacturer.medicochain.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.manufacturer.medicochain.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.manufacturer.medicochain.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.manufacturer.medicochain.com:7051
+      - CORE_PEER_LOCALMSPID=ManufacturerMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/manufacturer.medicochain.com/peers/peer0.manufacturer.medicochain.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/manufacturer.medicochain.com/peers/peer0.manufacturer.medicochain.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.manufacturer.medicochain.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 7051:7051
+    networks:
+      - test
+
+  peer0.distributor.medicochain.com:
+    container_name: peer0.distributor.medicochain.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.distributor.medicochain.com
+      - CORE_PEER_ADDRESS=peer0.distributor.medicochain.com:9051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.distributor.medicochain.com:9052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.distributor.medicochain.com:9051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.distributor.medicochain.com:9051
+      - CORE_PEER_LOCALMSPID=DistributorMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/distributor.medicochain.com/peers/peer0.distributor.medicochain.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/distributor.medicochain.com/peers/peer0.distributor.medicochain.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.distributor.medicochain.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 9051:9051
+    networks:
+      - test
+
+
+
+  peer0.wholesaler.medicochain.com:
+    container_name: peer0.wholesaler.medicochain.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.wholesaler.medicochain.com
+      - CORE_PEER_ADDRESS=peer0.wholesaler.medicochain.com:5051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:5051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.wholesaler.medicochain.com:5052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.wholesaler.medicochain.com:5051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.wholesaler.medicochain.com:5051
+      - CORE_PEER_LOCALMSPID=WholesalerMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/wholesaler.medicochain.com/peers/peer0.wholesaler.medicochain.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/wholesaler.medicochain.com/peers/peer0.wholesaler.medicochain.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.wholesaler.medicochain.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 5051:5051
+    networks:
+      - test
+
+
+
+  peer0.retailer.medicochain.com:
+    container_name: peer0.retailer.medicochain.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      #Generic peer variables
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.retailer.medicochain.com
+      - CORE_PEER_ADDRESS=peer0.retailer.medicochain.com:3051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:3051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.retailer.medicochain.com:3052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:3052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.medicochain.com:3051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.retailer.medicochain.com:3051
+      - CORE_PEER_LOCALMSPID=RetailerMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/retailer.medicochain.com/peers/peer0.retailer.medicochain.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/retailer.medicochain.com/peers/peer0.retailer.medicochain.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.retailer.medicochain.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 3051:3051
+    networks:
+      - test

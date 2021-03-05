@@ -1,0 +1,240 @@
+Organizations:
+
+    - &OrdererOrg
+        Name: OrdererOrg
+
+        ID: OrdererMSP
+
+        MSPDir: ../organizations/ordererOrganizations/medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+        OrdererEndpoints:
+            - orderer.medicochain.com:7050
+
+    - &Manufacturer
+        Name: ManufacturerMSP
+
+        ID: ManufacturerMSP
+
+        MSPDir: ../organizations/peerOrganizations/manufacturer.medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.peer', 'ManufacturerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('ManufacturerMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('ManufacturerMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.manufacturer.medicochain.com
+              Port: 7051
+
+    - &Distributor
+        Name: DistributorMSP
+
+        ID: DistributorMSP
+
+        MSPDir: ../organizations/peerOrganizations/distributor.medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('DistributorMSP.admin', 'DistributorMSP.peer', 'DistributorMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('DistributorMSP.admin', 'DistributorMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('DistributorMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('DistributorMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.distributor.medicochain.com
+              Port: 9051
+
+
+    - &Wholesaler
+        Name: WholesalerMSP
+
+        ID: WholesalerMSP
+
+        MSPDir: ../organizations/peerOrganizations/wholesaler.medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.peer', 'WholesalerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.wholesaler.medicochain.com
+              Port: 5051
+
+    - &Retailer
+        Name: RetailerMSP
+
+        ID: RetailerMSP
+
+        MSPDir: ../organizations/peerOrganizations/retailer.medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.peer', 'RetailerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('RetailerMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.retailer.medicochain.com
+              Port: 3051
+
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V2_0: true
+
+    Orderer: &OrdererCapabilities
+        V2_0: true
+
+    Application: &ApplicationCapabilities
+        V2_0: true
+
+Application: &ApplicationDefaults
+
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+Orderer: &OrdererDefaults
+
+    OrdererType: etcdraft
+
+    EtcdRaft:
+        Consenters:
+        - Host: orderer.medicochain.com
+          Port: 7050
+          ClientTLSCert: ../organizations/ordererOrganizations/medicochain.com/orderers/orderer.medicochain.com/tls/server.crt
+          ServerTLSCert: ../organizations/ordererOrganizations/medicochain.com/orderers/orderer.medicochain.com/tls/server.crt
+
+    BatchTimeout: 2s
+
+    # Batch Size: Controls the number of messages batched into a block
+    BatchSize:
+
+        # Max Message Count: The maximum number of messages to permit in a batch
+        MaxMessageCount: 10
+
+        AbsoluteMaxBytes: 99 MB
+
+        PreferredMaxBytes: 512 KB
+
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+
+    FourOrgsOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *Manufacturer
+                    - *Distributor
+                    - *Wholesaler
+                    - *Retailer
+    FourOrgsChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Manufacturer
+                - *Distributor
+                - *Wholesaler
+                - *Retailer
+            Capabilities:
+                <<: *ApplicationCapabilities

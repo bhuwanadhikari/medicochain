@@ -1,0 +1,45 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+################################################################################
+#
+#   Section: Organizations
+#
+#   - This section defines the different organizational identities which will
+#   be referenced later in the configuration.
+#
+################################################################################
+Organizations:
+    - &Wholesaler
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: WholesalerMSP
+
+        # ID to load the MSP definition as
+        ID: WholesalerMSP
+
+        MSPDir: ../organizations/peerOrganizations/wholesaler.medicochain.com/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.peer', 'WholesalerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('WholesalerMSP.peer')"
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.wholesaler.medicochain.com
+              Port: 11051

@@ -1,0 +1,359 @@
+
+
+peer:
+
+    id: jdoe
+
+    networkId: dev
+
+    listenAddress: 0.0.0.0:7051
+
+    address: 0.0.0.0:7051
+
+    addressAutoDetect: false
+
+    keepalive:
+        interval: 7200s
+        timeout: 20s
+        minInterval: 60s
+        client:
+            interval: 60s
+            timeout: 20s
+        deliveryClient:
+            interval: 60s
+            timeout: 20s
+
+
+    gossip:
+        bootstrap: 127.0.0.1:7051
+
+        useLeaderElection: false
+        orgLeader: true
+
+        membershipTrackerInterval: 5s
+
+        endpoint:
+        maxBlockCountToStore: 10
+        maxPropagationBurstLatency: 10ms
+        maxPropagationBurstSize: 10
+        propagateIterations: 1
+        propagatePeerNum: 3
+        pullInterval: 4s
+        pullPeerNum: 3
+        requestStateInfoInterval: 4s
+        publishStateInfoInterval: 4s
+        stateInfoRetentionInterval:
+        publishCertPeriod: 10s
+        skipBlockVerification: false
+        dialTimeout: 3s
+        connTimeout: 2s
+        recvBuffSize: 20
+        sendBuffSize: 200
+        digestWaitTime: 1s
+        requestWaitTime: 1500ms
+        responseWaitTime: 2s
+        aliveTimeInterval: 5s
+        aliveExpirationTimeout: 25s
+        reconnectInterval: 25s
+        maxConnectionAttempts: 120
+        msgExpirationFactor: 20
+        externalEndpoint:
+        election:
+            startupGracePeriod: 15s
+            membershipSampleInterval: 1s
+            leaderAliveThreshold: 10s
+            leaderElectionDuration: 5s
+
+        pvtData:
+            pullRetryThreshold: 60s
+            transientstoreMaxBlockRetention: 1000
+            pushAckTimeout: 3s
+            btlPullMargin: 10
+            reconcileBatchSize: 10
+            reconcileSleepInterval: 1m
+            reconciliationEnabled: true
+            skipPullingInvalidTransactionsDuringCommit: false
+            implicitCollectionDisseminationPolicy:
+               requiredPeerCount: 0
+               maxPeerCount: 1
+
+        state:
+            enabled: false
+            checkInterval: 10s
+            responseTimeout: 3s
+            batchSize: 10
+            blockBufferSize: 20
+            maxRetries: 3
+
+    tls:
+        enabled:  false
+        clientAuthRequired: false
+        cert:
+            file: tls/server.crt
+        key:
+            file: tls/server.key
+        rootcert:
+            file: tls/ca.crt
+        clientRootCAs:
+            files:
+              - tls/ca.crt
+        clientKey:
+            file:
+        clientCert:
+            file:
+
+    authentication:
+        timewindow: 15m
+
+    fileSystemPath: /var/hyperledger/production
+
+    BCCSP:
+        Default: SW
+        # Settings for the SW crypto provider (i.e. when DEFAULT: SW)
+        SW:
+            # TODO: The default Hash and Security level needs refactoring to be
+            # fully configurable. Changing these defaults requires coordination
+            # SHA2 is hardcoded in several places, not only BCCSP
+            Hash: SHA2
+            Security: 256
+            # Location of Key Store
+            FileKeyStore:
+                # If "", defaults to 'mspConfigPath'/keystore
+                KeyStore:
+        # Settings for the PKCS#11 crypto provider (i.e. when DEFAULT: PKCS11)
+        PKCS11:
+            # Location of the PKCS11 module library
+            Library:
+            # Token Label
+            Label:
+            # User PIN
+            Pin:
+            Hash:
+            Security:
+
+    # Path on the file system where peer will find MSP local configurations
+    mspConfigPath: msp
+
+    localMspId: SampleOrg
+
+    client:
+        # connection timeout
+        connTimeout: 3s
+
+    # Delivery service related config
+    deliveryclient:
+        reconnectTotalTimeThreshold: 3600s
+
+        connTimeout: 3s
+
+        # It sets the delivery service maximal delay between consecutive retries
+        reConnectBackoffThreshold: 3600s
+
+        # A list of orderer endpoint addresses which should be overridden
+        # when found in channel configurations.
+        addressOverrides:
+        #  - from:
+        #    to:
+        #    caCertsFile:
+        #  - from:
+        #    to:
+        #    caCertsFile:
+
+    # Type for the local MSP - by default it's of type bccsp
+    localMspType: bccsp
+
+    # Used with Go profiling tools only in none production environment. In
+    # production, it should be disabled (eg enabled: false)
+    profile:
+        enabled:     false
+        listenAddress: 0.0.0.0:6060
+
+  
+    handlers:
+        authFilters:
+          -
+            name: DefaultAuth
+          -
+            name: ExpirationCheck    # This filter checks identity x509 certificate expiration
+        decorators:
+          -
+            name: DefaultDecorator
+        endorsers:
+          escc:
+            name: DefaultEndorsement
+            library:
+        validators:
+          vscc:
+            name: DefaultValidation
+            library:
+
+   
+    validatorPoolSize:
+
+  
+    discovery:
+        enabled: true
+        # Whether the authentication cache is enabled or not.
+        authCacheEnabled: true
+        # The maximum size of the cache, after which a purge takes place
+        authCacheMaxSize: 1000
+        # The proportion (0 to 1) of entries that remain in the cache after the cache is purged due to overpopulation
+        authCachePurgeRetentionRatio: 0.75
+        # Whether to allow non-admins to perform non channel scoped queries.
+        # When this is false, it means that only peer admins can perform non channel scoped queries.
+        orgMembersAllowedAccess: false
+
+    # Limits is used to configure some internal resource limits.
+    limits:
+        concurrency:
+            # including both user chaincodes and system chaincodes.
+            endorserService: 2500
+            # deliverService limits concurrent event listeners registered to deliver service for blocks and transaction events.
+            deliverService: 2500
+vm:
+
+    
+    endpoint: unix:///var/run/do
+    docker:
+        tls:
+            enabled: false
+            ca:
+                file: docker/ca.crt
+            cert:
+                file: docker/tls.crt
+            key:
+                file: docker/tls.key
+
+        attachStdout: false
+
+        hostConfig:
+            NetworkMode: host
+            Dns:
+               # - 192.168.0.1
+            LogConfig:
+                Type: json-file
+                Config:
+                    max-size: "50m"
+                    max-file: "5"
+            Memory: 2147483648
+
+chaincode:
+
+    id:
+        path:
+        name:
+
+    builder: $(DOCKER_NS)/fabric-ccenv:$(TWO_DIGIT_VERSION)
+
+    pull: false
+
+    golang:
+        runtime: $(DOCKER_NS)/fabric-baseos:$(TWO_DIGIT_VERSION)
+
+        dynamicLink: false
+
+    java:
+        runtime: $(DOCKER_NS)/fabric-javaenv:$(TWO_DIGIT_VERSION)
+
+    node:
+        runtime: $(DOCKER_NS)/fabric-nodeenv:$(TWO_DIGIT_VERSION)
+
+    externalBuilders: []
+
+    installTimeout: 300s
+
+    startuptimeout: 300s
+
+    executetimeout: 30s
+
+    mode: net
+
+    keepalive: 0
+
+    # enabled system chaincodes
+    system:
+        _lifecycle: enable
+        cscc: enable
+        lscc: enable
+        qscc: enable
+
+    # Logging section for the chaincode container
+    logging:
+      # Default level for all loggers within the chaincode container
+      level:  info
+      # Override default level for the 'shim' logger
+      shim:   warning
+      # Format for the chaincode container logs
+      format: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}'
+
+ledger:
+
+  blockchain:
+
+  state:
+    stateDatabase: goleveldb
+    totalQueryLimit: 100000
+    couchDBConfig:
+       couchDBAddress: 127.0.0.1:5984
+       username:
+       password:
+       maxRetries: 3
+       maxRetriesOnStartup: 10
+       requestTimeout: 35s
+       internalQueryLimit: 1000
+       maxBatchUpdateSize: 1000
+       warmIndexesAfterNBlocks: 1
+       createGlobalChangesDB: false
+       cacheSize: 64
+
+  history:
+    enableHistoryDatabase: true
+
+  pvtdataStore:
+    collElgProcMaxDbBatchSize: 5000
+    collElgProcDbBatchesInterval: 1000
+    deprioritizedDataReconcilerInterval: 60m
+
+  snapshots:
+    rootDir: /var/hyperledger/production/snapshots
+
+operations:
+    # host and port for the operations server
+    listenAddress: 127.0.0.1:9443
+
+    # TLS configuration for the operations endpoint
+    tls:
+        # TLS enabled
+        enabled: false
+
+        # path to PEM encoded server certificate for the operations server
+        cert:
+            file:
+
+        # path to PEM encoded server key for the operations server
+        key:
+            file:
+
+        # is enabled. clientAuthRequired requires client certificate authentication
+        # at the TLS layer to access all resources.
+        clientAuthRequired: false
+
+        # paths to PEM encoded ca certificates to trust for client authentication
+        clientRootCAs:
+            files: []
+
+metrics:
+    provider: disabled
+
+    statsd:
+        network: udp
+
+        # statsd server address
+        address: 127.0.0.1:8125
+
+        # the interval at which locally cached counters and gauges are pushed
+        # to statsd; timings are pushed immediately
+        writeInterval: 10s
+
+        # prefix is prepended to all emitted statsd metrics
+        prefix:

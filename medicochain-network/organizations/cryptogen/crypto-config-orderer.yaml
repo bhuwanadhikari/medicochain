@@ -1,0 +1,9 @@
+OrdererOrgs:
+  # Orderer
+  - Name: Orderer
+    Domain: medicochain.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - localhost
